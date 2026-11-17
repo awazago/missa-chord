@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MissaChord — Acervo Litúrgico em ChordPro (PWA)
 
-## Getting Started
+Aplicação web progressiva (PWA) para músicos e ministérios de música católicos gerenciarem cifras em padrão **ChordPro**, transporem tons instantaneamente, importarem músicas a partir de URLs e gerarem setlists completos baseados na liturgia do dia.
 
-First, run the development server:
+## Funcionalidades
+
+- **Acervo em ChordPro**: parser e transposição cromática em tempo real (`-1 / +1` semitom), salvando o tom preferido por música.
+- **Importação via URL (`/api/import-url`)**: extrai cifras de páginas web e converte para ChordPro automaticamente, com fallback para colar texto com acordes acima da letra.
+- **Categorização Múltipla**: uma mesma música pode pertencer a vários momentos da missa (*Entrada*, *Comunhão*, *Final*, etc.) e tempos litúrgicos.
+- **Classificação por Estrelas (1–5★)**: ordenação e priorização automática nas sugestões de setlist.
+- **Gerador de Setlist Litúrgico**: gera roteiros (ex.: `missa_terceiro_domingo_tempo_comum`), omitindo o *Glória* na Quaresma/Advento e abrindo o **Modo Missa** para tocar música a música.
+- **PWA Offline-First + Modo Palco**: instalável em celulares/tablets, Service Worker para uso sem sinal na igreja, modo escuro de alto contraste e *Screen Wake Lock* (tela sempre acesa).
+
+## Rodando Localmente
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse `http://localhost:3000`. Sem variáveis de ambiente configuradas, o app funciona em **Modo Offline Local** (`localStorage`) com um acervo inicial pré-carregado.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploy Gratuito (Vercel Hobby + Domínio Próprio + Supabase Free)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Banco e Autenticação (Supabase Free)**:
+   - Crie um projeto gratuito em [supabase.com](https://supabase.com).
+   - No **SQL Editor**, execute o conteúdo de `supabase/schema.sql`.
+   - Em **Authentication → Providers**, ative **Email** e **Google** (informando Client ID e Secret do Google Cloud Console).
+2. **Hospedagem e Domínio Próprio (Vercel Hobby)**:
+   - Suba este repositório para o GitHub e importe na [vercel.com](https://vercel.com).
+   - Em **Settings → Environment Variables**, adicione `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` (veja `.env.example`).
+   - Em **Settings → Domains**, adicione seu domínio próprio (SSL automático e gratuito).
+3. **Quando escalar / monetizar**:
+   - Ao ativar cobrança dos planos Premium (ex.: Stripe / Mercado Pago), faça o upgrade da Vercel para o plano **Pro** (exigência de licença comercial da Vercel) e do Supabase conforme o volume de usuários.
