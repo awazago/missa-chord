@@ -8,7 +8,7 @@ import {
   User,
   Search,
   X,
-  Cross,
+  ListMusic,
   ArrowUpDown,
 } from 'lucide-react';
 import {
@@ -26,6 +26,9 @@ import {
   Song,
   UserProfile,
 } from '@/types/music';
+import { canAddSetlist, canAddSong, FREE_LIMITS } from '@/lib/plans';
+import { getSupabaseClient } from '@/lib/supabase';
+import { AuthGate } from '@/components/AuthGate';
 import { StarRating } from '@/components/StarRating';
 import { ChordProViewer } from '@/components/ChordProViewer';
 import { ImportSongView } from '@/components/ImportSongView';
@@ -40,6 +43,7 @@ export default function HomePage() {
   const [setlists, setSetlists] = useState<MassSetlist[]>([]);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [limitNotice, setLimitNotice] = useState<string | null>(null);
 
   // Acervo filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,6 +56,24 @@ export default function HomePage() {
     setSetlists(loadSetlists());
     setUser(loadUser());
     setHydrated(true);
+
+    const sb = getSupabaseClient();
+    if (sb) {
+      sb.auth.getSession().then(({ data }) => {
+        if (data.session?.user) {
+          const u = data.session.user;
+          const profile: UserProfile = {
+            id: u.id,
+            email: u.email || '',
+            name: (u.user_metadata?.full_name as string) || (u.user_metadata?.name as string) || u.email?.split('@')[0] || 'Músico',
+            provider: u.app_metadata?.provider === 'google' ? 'google' : 'email',
+            plan: 'free',
+          };
+          setUser(profile);
+          saveUser(profile);
+        }
+      });
+    }
   }, []);
 
   const updateAndPersistSongs = (nextSongs: Song[]) => {
@@ -69,6 +91,14 @@ export default function HomePage() {
   };
 
   const handleSaveNewSong = (newSong: Song) => {
+    if (!canAddSong(user, songs.length)) {
+      setLimitNotice(
+        `Você atingiu o limite de ${FREE_LIMITS.maxSongs} músicas do plano gratuito. Faça upgrade para o Premium em Conta & Planos.`
+      );
+      setActiveTab('conta');
+      return;
+    }
+    setLimitNotice(null);
     updateAndPersistSongs([newSong, ...songs]);
     setActiveTab('acervo');
     setSelectedSongId(newSong.id);
@@ -76,6 +106,14 @@ export default function HomePage() {
 
   const handleSaveSetlist = (setlist: MassSetlist) => {
     const exists = setlists.some((s) => s.id === setlist.id);
+    if (!exists && !canAddSetlist(user, setlists.length)) {
+      setLimitNotice(
+        `Você atingiu o limite de ${FREE_LIMITS.maxSetlists} setlists do plano gratuito. Faça upgrade para o Premium em Conta & Planos.`
+      );
+      setActiveTab('conta');
+      return;
+    }
+    setLimitNotice(null);
     const next = exists
       ? setlists.map((s) => (s.id === setlist.id ? setlist : s))
       : [setlist, ...setlists];
@@ -113,6 +151,25 @@ export default function HomePage() {
 
   const selectedSong = songs.find((s) => s.id === selectedSongId) ?? null;
 
+  if (!hydrated) {
+    return (
+      <div className="app-shell" style={{ justifyContent: 'center', alignItems: 'center', padding: '2rem' }}>
+        <div className="alert alert-info">Carregando ChordSet...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <AuthGate
+        onLogin={(loggedUser) => {
+          setUser(loggedUser);
+          saveUser(loggedUser);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="app-shell">
       {/* Top Bar */}
@@ -127,11 +184,11 @@ export default function HomePage() {
             }}
           >
             <span className="brand-mark">
-              <Cross size={18} />
+              <ListMusic size={18} />
             </span>
             <span>
-              <span className="brand-name">MissaChord</span>
-              <span className="brand-sub">Acervo Litúrgico ChordPro</span>
+              <span className="brand-name">ChordSet</span>
+              <span className="brand-sub">Acervo &amp; Setlists em ChordPro</span>
             </span>
           </a>
 
@@ -170,6 +227,19 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="main-content">
+        {limitNotice && (
+          <div className="alert alert-error" style={{ marginBottom: '1rem', justifyContent: 'space-between' }}>
+            <span>{limitNotice}</span>
+            <button
+              type="button"
+              className="btn btn-sm btn-icon"
+              onClick={() => setLimitNotice(null)}
+              aria-label="Fechar aviso"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
         {!hydrated ? (
           <div className="alert alert-info">Carregando acervo offline...</div>
         ) : activeTab === 'acervo' ? (

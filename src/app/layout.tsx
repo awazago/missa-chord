@@ -19,14 +19,14 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'MissaChord — Acervo Litúrgico em ChordPro',
+  title: 'ChordSet — Acervo & Setlists em ChordPro',
   description:
-    'Acervo católico de cifras em formato ChordPro com transposição rápida, importação via URL, avaliação por estrelas e gerador de setlist pela liturgia do dia.',
+    'Acervo inteligente de cifras em formato ChordPro com transposição rápida, importação via URL, avaliação por estrelas e gerador de setlists.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'MissaChord',
+    title: 'ChordSet',
   },
   icons: {
     icon: '/icon.svg',

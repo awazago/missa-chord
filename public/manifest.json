@@ -1,7 +1,7 @@
 {
-  "name": "MissaChord — Acervo Litúrgico",
-  "short_name": "MissaChord",
-  "description": "Acervo católico de cifras em ChordPro, transposição rápida e gerador de setlists para a Santa Missa.",
+  "name": "ChordSet — Acervo & Setlists em ChordPro",
+  "short_name": "ChordSet",
+  "description": "Acervo inteligente de cifras em ChordPro com transposição rápida, importação via URL e gerador de setlists.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#faf8f5",
